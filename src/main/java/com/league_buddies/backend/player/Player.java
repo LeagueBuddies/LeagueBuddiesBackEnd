@@ -44,47 +44,7 @@ public class Player {
 
     @Column
     private float winRate;
-
-//    public long getId() {
-//        return id;
-//    }
-//
-//    public String getUsername() {
-//        return username;
-//    }
-//
-//    public String getPassword() {
-//        return password;
-//    }
-//
-//    public String getLeagueOfLegendsUserName() {
-//        return leagueOfLegendsUserName;
-//    }
-//
-//    public Position getFavoritePosition() {
-//        return favoritePosition;
-//    }
-//
-//    public String getFavoriteChampion() {
-//        return favoriteChampion;
-//    }
-//
-//    public String getDescription() {
-//        return description;
-//    }
-//
-//    public PlayerType getPlayerType() {
-//        return playerType;
-//    }
-//
-//    public float getWinRate() {
-//        return winRate;
-//    }
-//
-//    public String getEmailAddress() {
-//        return emailAddress;
-//    }
-
+    
     public void setUsername(String username) {
         if (username != null && !username.isEmpty()) {
             this.username = username;
