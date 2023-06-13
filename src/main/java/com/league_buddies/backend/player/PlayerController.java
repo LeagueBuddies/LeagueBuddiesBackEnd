@@ -10,8 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/player")
 public class PlayerController {
-    @Autowired
     PlayerService playerService;
+
+    @Autowired
+    public PlayerController(PlayerService playerService) {
+        this.playerService = playerService;
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Player> getPlayerById(@PathVariable("id") Long id) {

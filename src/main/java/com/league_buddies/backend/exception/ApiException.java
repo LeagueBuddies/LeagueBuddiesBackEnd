@@ -1,17 +1,19 @@
 package com.league_buddies.backend.exception;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 import java.time.ZonedDateTime;
 
 @Getter
+@NoArgsConstructor
 public class ApiException {
-    private final HttpStatus status;
+    private HttpStatus status;
 
-    private final String message;
+    private String message;
 
-    private final ZonedDateTime timestamp;
+    private ZonedDateTime timestamp;
 
     public ApiException(HttpStatus status,
                         String message,
