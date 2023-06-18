@@ -1,5 +1,6 @@
 package com.league_buddies.backend.player;
 
+import com.league_buddies.backend.exception.IllegalArgumentException;
 import com.league_buddies.backend.exception.PlayerNotFoundException;
 import com.league_buddies.backend.exception.UsernameAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class PlayerService {
     }
 
     public Player findByUsername(String username) {
-        if (username.isEmpty()) {
+        if (username.isEmpty() || username.isBlank() || username == null) {
             throw new IllegalArgumentException("Username must not be empty.");
         }
         Optional<Player> optionalPlayer = playerRepository.findByUsername(username);
@@ -41,7 +42,8 @@ public class PlayerService {
     }
 
     public Player createPlayer(Player player) {
-        if (player == null) {
+        if (player == null || player.getEmailAddress() == null || player.getPassword() == null) {
+            // TODO Separate all the errors from exceptions into a file for the code to be DRY.
             throw new IllegalArgumentException("Player must not be null.");
         }
 
