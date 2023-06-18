@@ -28,4 +28,13 @@ public class CustomExceptionHandler {
         );
         return ResponseEntity.status(status).body(apiException);
     }
+
+    @ExceptionHandler(value = {UsernameAlreadyExistsException.class})
+    public ResponseEntity<Object> handleUsernameAlreadyExistsException(UsernameAlreadyExistsException exception) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        ApiException apiException = new ApiException(
+                status, exception.getMessage(), ZonedDateTime.now(ZoneId.of("Z"))
+        );
+        return ResponseEntity.status(status).body(apiException);
+    }
 }

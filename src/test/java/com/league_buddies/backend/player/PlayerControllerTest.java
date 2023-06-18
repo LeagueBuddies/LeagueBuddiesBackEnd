@@ -216,6 +216,23 @@ class PlayerControllerTest {
     }
 
     @Test
+    public void throwsWhenCreatePlayerGetsAlreadyExistingUsername() throws Exception {
+        // Arrange
+        when(playerRepository.findByUsername(anyString())).thenReturn(optionalPlayer);
+
+        // Act
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/v1/player").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(optionalPlayer.get()))
+        ).andReturn().getResponse();
+        ApiException apiException = objectMapper.readValue(response.getContentAsString(), ApiException.class);
+
+        // Assert
+        assertEquals(HttpStatus.CONFLICT.value(), response.getStatus());
+        assertEquals("Username is already taken.", apiException.getMessage());
+    }
+
+    @Test
     public void canUpdatePlayer() throws Exception {
         // Arrange
         when(playerRepository.findById(anyLong())).thenReturn(optionalPlayer);

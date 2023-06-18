@@ -42,7 +42,7 @@ public class PlayerService {
     }
 
     public Player createPlayer(Player player) {
-        if (player.getEmailAddress() == null || player.getPassword() == null) {
+        if (player == null || player.getEmailAddress() == null || player.getPassword() == null) {
             // TODO Separate all the errors from exceptions into a file for the code to be DRY.
             throw new IllegalArgumentException("Player must not be null.");
         }
