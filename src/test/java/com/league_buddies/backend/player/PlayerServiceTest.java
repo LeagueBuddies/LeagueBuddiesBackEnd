@@ -1,5 +1,6 @@
 package com.league_buddies.backend.player;
 
+import com.league_buddies.backend.exception.IllegalArgumentException;
 import com.league_buddies.backend.exception.PlayerNotFoundException;
 import com.league_buddies.backend.exception.UsernameAlreadyExistsException;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,19 +29,22 @@ class PlayerServiceTest {
 
     private Long id;
 
+    private String username;
+
     @BeforeEach
     void setUp() {
         // Stub the playerRepo into our service before each test.
         playerService = new PlayerService(playerRepository);
 
-        optionalPlayer = Optional.of(new Player());
+        optionalPlayer = Optional.of(new Player("email@gmail.com", "password1234"));
+
+        id = 1L;
+        username = "Isolated";
+
+        optionalPlayer.get().setId(id);
+        optionalPlayer.get().setUsername(username);
 
         player = optionalPlayer.get();
-        player.setId(1L);
-        player.setUsername("Isolated");
-
-        // DRY
-        id = 1L;
     }
 
     @Test
@@ -136,17 +140,13 @@ class PlayerServiceTest {
         // Arrange
         when(playerRepository.save(any(Player.class))).thenReturn(player);
 
-        Player playerToSave = new Player();
-        playerToSave.setId(player.getId());
-        playerToSave.setUsername(player.getUsername());
-
         // Act
-        Player createdPlayer = playerService.createPlayer(playerToSave);
+        Player createdPlayer = playerService.createPlayer(player);
 
         // Assert
         assertNotNull(createdPlayer);
-        assertEquals(playerToSave.getId(), createdPlayer.getId());
-        assertEquals(playerToSave.getUsername(), createdPlayer.getUsername());
+        assertEquals(player.getId(), createdPlayer.getId());
+        assertEquals(player.getUsername(), createdPlayer.getUsername());
     }
 
     @Test
@@ -154,13 +154,9 @@ class PlayerServiceTest {
         // Arrange
         when(playerRepository.findByUsername(anyString())).thenReturn(optionalPlayer);
 
-        Player playerToSave = new Player();
-        playerToSave.setId(player.getId());
-        playerToSave.setUsername(player.getUsername());
-
         // Act
         UsernameAlreadyExistsException exception = assertThrows(
-                UsernameAlreadyExistsException.class, () -> playerService.createPlayer(playerToSave)
+                UsernameAlreadyExistsException.class, () -> playerService.createPlayer(player)
         );
 
         // Assert
@@ -207,16 +203,15 @@ class PlayerServiceTest {
     void updatesPlayer() {
         // Arrange
         when(playerRepository.findById(anyLong())).thenReturn(optionalPlayer);
-
-        // Act
         Player newPlayerData = new Player();
         newPlayerData.setUsername("Noel");
-        newPlayerData.setId(1L);
+        newPlayerData.setEmailAddress("newEmail@gmail.com");
 
-        Player updatedPlayer = playerService.updatePlayer(5L, newPlayerData);
+        // Act
+        Player updatedPlayer = playerService.updatePlayer(id, newPlayerData);
 
         // Assert
-        assertEquals(newPlayerData.getId(), updatedPlayer.getId());
+        assertEquals(newPlayerData.getEmailAddress(), updatedPlayer.getEmailAddress());
         assertEquals(newPlayerData.getUsername(), updatedPlayer.getUsername());
     }
 

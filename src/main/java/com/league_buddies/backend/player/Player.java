@@ -11,8 +11,8 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class Player {
     @Id
     @GeneratedValue
@@ -44,7 +44,12 @@ public class Player {
 
     @Column
     private float winRate;
-    
+
+    public Player(String emailAddress, String password) {
+        this.emailAddress = emailAddress;
+        this.password = password;
+    }
+
     public void setUsername(String username) {
         if (username != null && !username.isEmpty()) {
             this.username = username;

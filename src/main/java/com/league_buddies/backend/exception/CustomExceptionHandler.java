@@ -12,10 +12,20 @@ import java.time.ZonedDateTime;
 public class CustomExceptionHandler {
 
     @ExceptionHandler(value = {PlayerNotFoundException.class})
-    public ResponseEntity<Object> handlePlayerNotFoundException
-            (PlayerNotFoundException exception) {
+    public ResponseEntity<Object> handlePlayerNotFoundException(PlayerNotFoundException exception) {
         HttpStatus status = HttpStatus.NOT_FOUND;
-        ApiException apiException = new ApiException(status, exception.getMessage(), ZonedDateTime.now(ZoneId.of("Z")));
+        ApiException apiException = new ApiException(
+                status, exception.getMessage(), ZonedDateTime.now(ZoneId.of("Z"))
+        );
+        return ResponseEntity.status(status).body(apiException);
+    }
+
+    @ExceptionHandler(value = {IllegalArgumentException.class})
+    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException exception) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ApiException apiException = new ApiException(
+                status, exception.getMessage(), ZonedDateTime.now(ZoneId.of("Z"))
+        );
         return ResponseEntity.status(status).body(apiException);
     }
 }
