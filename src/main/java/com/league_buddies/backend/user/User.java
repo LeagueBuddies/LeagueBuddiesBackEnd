@@ -13,12 +13,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name="user_table")
 public class User {
     @Id
     @GeneratedValue
     private long id;
 
-    @Column(nullable = false)
     private String username;
 
     @Column(nullable = false)
@@ -27,19 +27,15 @@ public class User {
     @Column(nullable = false)
     private String emailAddress;
 
-    @Column(nullable = false)
     private String leagueOfLegendsUserName;
 
-    @Column(nullable = false)
     private Position favoritePosition;
 
-    @Column(nullable = false)
     private String favoriteChampion;
 
     @Column
     private String description;
 
-    @Column(nullable = false)
     private PlayerType playerType;
 
     @Column
