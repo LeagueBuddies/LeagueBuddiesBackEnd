@@ -11,8 +11,8 @@ import java.time.ZonedDateTime;
 @ControllerAdvice
 public class CustomExceptionHandler {
 
-    @ExceptionHandler(value = {PlayerNotFoundException.class})
-    public ResponseEntity<Object> handlePlayerNotFoundException(PlayerNotFoundException exception) {
+    @ExceptionHandler(value = {UserNotFoundException.class})
+    public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException exception) {
         HttpStatus status = HttpStatus.NOT_FOUND;
         ApiException apiException = new ApiException(
                 status, exception.getMessage(), ZonedDateTime.now(ZoneId.of("Z"))
