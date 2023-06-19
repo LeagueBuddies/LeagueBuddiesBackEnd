@@ -1,4 +1,4 @@
-package com.league_buddies.backend.player;
+package com.league_buddies.backend.user;
 
 import com.league_buddies.backend.playerType.PlayerType;
 import com.league_buddies.backend.position.Position;
@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Player {
+public class User {
     @Id
     @GeneratedValue
     private long id;
@@ -45,7 +45,7 @@ public class Player {
     @Column
     private float winRate;
 
-    public Player(String emailAddress, String password) {
+    public User(String emailAddress, String password) {
         this.emailAddress = emailAddress;
         this.password = password;
     }
