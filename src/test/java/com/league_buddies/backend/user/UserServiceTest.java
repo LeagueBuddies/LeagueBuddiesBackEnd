@@ -42,7 +42,7 @@ class UserServiceTest {
         username = "Isolated";
 
         optionalUser.get().setId(id);
-        optionalUser.get().setUsername(username);
+        optionalUser.get().setDisplayName(username);
 
         user = optionalUser.get();
     }
@@ -89,25 +89,25 @@ class UserServiceTest {
     @Test
     void findsByUsername() {
         // Arrange
-        optionalUser.get().setUsername("Isolated");
-        when(userRepository.findByUsername(anyString())).thenReturn(optionalUser);
+        optionalUser.get().setDisplayName("Isolated");
+        when(userRepository.findByEmailAddress(anyString())).thenReturn(optionalUser);
 
         // Act
-        User user = userService.findByUsername("Isolated");
+        User user = userService.findByEmailAddress("Isolated");
 
         // Assert
-        verify(userRepository).findByUsername("Isolated");
-        assertEquals("Isolated", user.getUsername());
+        verify(userRepository).findByEmailAddress("Isolated");
+        assertEquals("Isolated", user.getDisplayName());
     }
 
     @Test
     void throwsWhenUserDoesNotExistWithGivenUsername() {
         // Arrange
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByEmailAddress(anyString())).thenReturn(Optional.empty());
 
         // Act
         UserNotFoundException exception = assertThrows(
-                UserNotFoundException.class, () -> userService.findByUsername("Isolated")
+                UserNotFoundException.class, () -> userService.findByEmailAddress("Isolated")
         );
 
         // Assert
@@ -118,7 +118,7 @@ class UserServiceTest {
     void throwsWhenFindByUsernameGetsEmptyString() {
         // Act
         IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class, () -> userService.findByUsername("")
+                IllegalArgumentException.class, () -> userService.findByEmailAddress("")
         );
 
         assertEquals("Username must not be empty.", exception.getMessage());
@@ -146,13 +146,13 @@ class UserServiceTest {
         // Assert
         assertNotNull(createdUser);
         assertEquals(user.getId(), createdUser.getId());
-        assertEquals(user.getUsername(), createdUser.getUsername());
+        assertEquals(user.getDisplayName(), createdUser.getDisplayName());
     }
 
     @Test
     void throwsWhenCreatesUserIsGivenAlreadyExistingUsername() {
         // Arrange
-        when(userRepository.findByUsername(anyString())).thenReturn(optionalUser);
+        when(userRepository.findByEmailAddress(anyString())).thenReturn(optionalUser);
 
         // Act
         UsernameAlreadyExistsException exception = assertThrows(
@@ -204,7 +204,7 @@ class UserServiceTest {
         // Arrange
         when(userRepository.findById(anyLong())).thenReturn(optionalUser);
         User newUserData = new User();
-        newUserData.setUsername("Noel");
+        newUserData.setDisplayName("Noel");
         newUserData.setEmailAddress("newEmail@gmail.com");
 
         // Act
@@ -212,7 +212,7 @@ class UserServiceTest {
 
         // Assert
         assertEquals(newUserData.getEmailAddress(), updatedUser.getEmailAddress());
-        assertEquals(newUserData.getUsername(), updatedUser.getUsername());
+        assertEquals(newUserData.getDisplayName(), updatedUser.getDisplayName());
     }
 
     @Test

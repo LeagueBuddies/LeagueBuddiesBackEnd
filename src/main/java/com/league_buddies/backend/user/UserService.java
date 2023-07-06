@@ -29,11 +29,11 @@ public class UserService {
         }
     }
 
-    public User findByUsername(String username) {
+    public User findByEmailAddress(String username) {
         if (username.isEmpty() || username.isBlank() || username == null) {
             throw new IllegalArgumentException("Username must not be empty.");
         }
-        Optional<User> optionalUser = userRepository.findByUsername(username);
+        Optional<User> optionalUser = userRepository.findByEmailAddress(username);
         if (optionalUser.isPresent()) {
             return optionalUser.get();
         } else {
@@ -47,7 +47,7 @@ public class UserService {
             throw new IllegalArgumentException("User must not be null.");
         }
 
-        Optional<User> optionalUser = userRepository.findByUsername(user.getUsername());
+        Optional<User> optionalUser = userRepository.findByEmailAddress(user.getDisplayName());
         if (optionalUser.isPresent()) {
             throw new UsernameAlreadyExistsException("Username is already taken.");
         }
@@ -69,7 +69,7 @@ public class UserService {
             throw new UserNotFoundException(String.format("User with Id: %d was not found.", Id));
         } else {
             User currUser = optionalUser.get();
-            currUser.setUsername(user.getUsername());
+            currUser.setDisplayName(user.getDisplayName());
             currUser.setEmailAddress(user.getEmailAddress());
             currUser.setPassword(user.getPassword());
             currUser.setLeagueOfLegendsUserName(user.getLeagueOfLegendsUserName());
@@ -78,6 +78,7 @@ public class UserService {
             currUser.setDescription(user.getDescription());
             currUser.setPlayerType(user.getPlayerType());
             currUser.setWinRate(user.getWinRate());
+            currUser.setRole(user.getRole());
             userRepository.save(currUser);
 
             return currUser;

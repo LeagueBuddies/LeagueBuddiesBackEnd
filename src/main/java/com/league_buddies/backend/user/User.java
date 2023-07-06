@@ -1,5 +1,7 @@
 package com.league_buddies.backend.user;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.league_buddies.backend.configuration.SimpleGrantedAuthorityDeserializer;
 import com.league_buddies.backend.playerType.PlayerType;
 import com.league_buddies.backend.position.Position;
 import jakarta.persistence.*;
@@ -7,6 +9,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Getter
@@ -14,12 +22,12 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name="user_table")
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue
     private long id;
 
-    private String username;
+    private String displayName;
 
     @Column(nullable = false)
     private String password;
@@ -33,22 +41,25 @@ public class User {
 
     private String favoriteChampion;
 
-    @Column
     private String description;
 
     private PlayerType playerType;
 
-    @Column
     private float winRate;
+
+    @Column(nullable = false)
+    // TODO Learn what @Enumerated does.
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
 
     public User(String emailAddress, String password) {
         this.emailAddress = emailAddress;
         this.password = password;
     }
 
-    public void setUsername(String username) {
-        if (username != null && !username.isEmpty()) {
-            this.username = username;
+    public void setDisplayName(String displayName) {
+        if (displayName != null && !displayName.isEmpty()) {
+            this.displayName = displayName;
         }
     }
 
@@ -99,5 +110,38 @@ public class User {
         if (emailAddress != null && !emailAddress.isEmpty()) {
             this.emailAddress = emailAddress;
         }
+    }
+
+    // TODO Learn about what this Annotation does.
+    @JsonDeserialize(contentUsing = SimpleGrantedAuthorityDeserializer.class)
+    @Override
+    public Collection<? extends SimpleGrantedAuthority> getAuthorities() {
+        return new ArrayList<>(List.of(new SimpleGrantedAuthority(role.name())));
+    }
+
+    @Override
+    public String getUsername() {
+        return this.emailAddress;
+    }
+
+    // We do not have a way to lock users or expire them etc so all of these return true for now.
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
