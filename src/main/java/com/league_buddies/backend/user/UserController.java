@@ -24,12 +24,6 @@ public class UserController {
         return ResponseEntity.ok(userService.findByEmailAddress(username));
     }
 
-    @PostMapping()
-    public ResponseEntity<User> postUser(@RequestBody User user) {
-        // TODO fix this because what if the user in the body comes with everything?
-        return ResponseEntity.ok(userService.createUser(user));
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable("id") long id, @RequestBody User user) {
         return ResponseEntity.ok(userService.updateUser(id, user));

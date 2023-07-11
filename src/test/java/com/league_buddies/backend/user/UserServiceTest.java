@@ -33,7 +33,6 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Stub the userRepo into our service before each test.
         userService = new UserService(userRepository);
 
         optionalUser = Optional.of(new User("email@gmail.com", "password1234"));
@@ -122,45 +121,6 @@ class UserServiceTest {
         );
 
         assertEquals("Username must not be empty.", exception.getMessage());
-    }
-
-    @Test
-    void throwsWhenCreateUserIsGivenNullValue() {
-        // Act
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class, () -> userService.createUser(null)
-        );
-
-        // Assert
-        assertEquals("User must not be null.", exception.getMessage());
-    }
-
-    @Test
-    void createsUser() {
-        // Arrange
-        when(userRepository.save(any(User.class))).thenReturn(user);
-
-        // Act
-        User createdUser = userService.createUser(user);
-
-        // Assert
-        assertNotNull(createdUser);
-        assertEquals(user.getId(), createdUser.getId());
-        assertEquals(user.getDisplayName(), createdUser.getDisplayName());
-    }
-
-    @Test
-    void throwsWhenCreatesUserIsGivenAlreadyExistingUsername() {
-        // Arrange
-        when(userRepository.findByEmailAddress(anyString())).thenReturn(optionalUser);
-
-        // Act
-        UsernameAlreadyExistsException exception = assertThrows(
-                UsernameAlreadyExistsException.class, () -> userService.createUser(user)
-        );
-
-        // Assert
-        assertEquals("Username is already taken.", exception.getMessage());
     }
 
     @Test

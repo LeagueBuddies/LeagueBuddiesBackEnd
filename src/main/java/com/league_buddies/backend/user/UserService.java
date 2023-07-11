@@ -2,7 +2,6 @@ package com.league_buddies.backend.user;
 
 import com.league_buddies.backend.exception.IllegalArgumentException;
 import com.league_buddies.backend.exception.UserNotFoundException;
-import com.league_buddies.backend.exception.UsernameAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,21 +38,6 @@ public class UserService {
         } else {
             throw new UserNotFoundException(String.format("User with username: %s was not found.", username));
         }
-    }
-
-    public User createUser(User user) {
-        if (user == null || user.getEmailAddress() == null || user.getPassword() == null) {
-            // TODO Separate all the errors from exceptions into a file for the code to be DRY.
-            throw new IllegalArgumentException("User must not be null.");
-        }
-
-        Optional<User> optionalUser = userRepository.findByEmailAddress(user.getDisplayName());
-        if (optionalUser.isPresent()) {
-            throw new UsernameAlreadyExistsException("Username is already taken.");
-        }
-
-        User postedUser = userRepository.save(user);
-        return postedUser;
     }
 
     public User updateUser(Long Id, User user) {
