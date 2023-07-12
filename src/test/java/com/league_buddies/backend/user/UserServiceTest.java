@@ -2,7 +2,6 @@ package com.league_buddies.backend.user;
 
 import com.league_buddies.backend.exception.IllegalArgumentException;
 import com.league_buddies.backend.exception.UserNotFoundException;
-import com.league_buddies.backend.exception.UsernameAlreadyExistsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

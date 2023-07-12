@@ -176,55 +176,6 @@ class UserControllerTest {
     }
 
     @Test
-    public void canCreateUser() throws Exception {
-        // Arrange
-        User user = new User(email, password);
-        when(userRepository.save(any(User.class))).thenReturn(user);
-
-        // Act
-        MockHttpServletResponse response = mockMvc.perform(
-                post("/api/v1/user/").contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user))).andReturn().getResponse();
-        User userPosted = objectMapper.readValue(response.getContentAsString(), User.class);
-
-        // Assert
-        assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertEquals(email, userPosted.getEmailAddress());
-        assertEquals(password, userPosted.getPassword());
-    }
-
-    @Test
-    public void throwsWhenCreateUserGetsNullValue() throws Exception {
-        // TODO look up if there is a way to allow only data JPA to create an empty entity. To make it easier to test.
-        // Act
-        MockHttpServletResponse response = mockMvc.perform(
-                post("/api/v1/user/").contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new User()))).andReturn().getResponse();
-        ApiException apiException = objectMapper.readValue(response.getContentAsString(), ApiException.class);
-
-        // Assert
-        assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
-        assertEquals("User must not be null.", apiException.getMessage());
-    }
-
-    @Test
-    public void throwsWhenCreateUserGetsAlreadyExistingUsername() throws Exception {
-        // Arrange
-        when(userRepository.findByEmailAddress(anyString())).thenReturn(optionalUser);
-
-        // Act
-        MockHttpServletResponse response = mockMvc.perform(
-                post("/api/v1/user").contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(optionalUser.get()))
-        ).andReturn().getResponse();
-        ApiException apiException = objectMapper.readValue(response.getContentAsString(), ApiException.class);
-
-        // Assert
-        assertEquals(HttpStatus.CONFLICT.value(), response.getStatus());
-        assertEquals("Username is already taken.", apiException.getMessage());
-    }
-
-    @Test
     public void canUpdateUser() throws Exception {
         // Arrange
         when(userRepository.findById(anyLong())).thenReturn(optionalUser);

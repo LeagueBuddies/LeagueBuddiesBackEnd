@@ -138,6 +138,6 @@ class AuthServiceTest {
         );
 
         // Assert
-        assertEquals("The user was not found using the email and password you've used.", exception.getMessage());
+        assertEquals("The user was not found using the email you've provided.", exception.getMessage());
     }
 }

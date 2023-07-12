@@ -53,7 +53,7 @@ public class AuthService {
         }
         Optional<User> optionalUser = userRepository.findByEmailAddress(authRequest.username());
         if (optionalUser.isEmpty()) {
-            throw new UserNotFoundException("The user was not found using the email and password you've used.");
+            throw new UserNotFoundException("The user was not found using the email you've provided.");
         }
         User user = optionalUser.get();
         // TODO change this to hash password in request and compare to hashed in the db.

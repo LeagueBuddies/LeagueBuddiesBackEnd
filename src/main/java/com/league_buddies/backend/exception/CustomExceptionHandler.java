@@ -48,4 +48,13 @@ public class CustomExceptionHandler {
         );
         return ResponseEntity.status(status).body(apiException);
     }
+
+    @ExceptionHandler(value = {InvalidPasswordException.class})
+    public ResponseEntity<Object> handleMessageNotReadableException(InvalidPasswordException exception) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        ApiException apiException = new ApiException(
+                status, exception.getMessage(), ZonedDateTime.now(ZoneId.of("Z"))
+        );
+        return ResponseEntity.status(status).body(apiException);
+    }
 }
