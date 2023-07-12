@@ -34,7 +34,7 @@ public class JwtService {
                 .getBody();
     }
 
-    private String extractSubject(String token) {
+    public String extractSubject(String token) {
         return extractClaims(token).getSubject();
     }
 

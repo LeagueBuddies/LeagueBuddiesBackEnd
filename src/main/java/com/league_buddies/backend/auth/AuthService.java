@@ -8,6 +8,9 @@ import com.league_buddies.backend.security.jwt.JwtService;
 import com.league_buddies.backend.user.User;
 import com.league_buddies.backend.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -17,6 +20,12 @@ public class AuthService {
     private final JwtService jwtService;
 
     private final UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+//    @Autowired
+//    private AuthenticationManager authenticationManager;
 
     @Autowired
     public AuthService(JwtService jwtService, UserRepository userRepository) {
@@ -37,8 +46,7 @@ public class AuthService {
             throw new UsernameAlreadyExistsException("Username is already taken.");
         }
 
-        User newUser = userRepository.save(new User(authRequest.username(), authRequest.password()));
-        //TODO Change this because password needs to be hashed when saved to database.
+        User newUser = userRepository.save(new User(authRequest.username(), passwordEncoder.encode(authRequest.password())));
         String token = jwtService.generateToken(newUser.getEmailAddress());
         return new AuthResponse(token);
     }
@@ -56,8 +64,13 @@ public class AuthService {
             throw new UserNotFoundException("The user was not found using the email you've provided.");
         }
         User user = optionalUser.get();
-        // TODO change this to hash password in request and compare to hashed in the db.
-        if (user.getPassword().equals(authRequest.password())){
+        if (passwordEncoder.matches(authRequest.password(), user.getPassword())){
+            //TODO Check if you need this because the application is working without it but it might be needed.
+//            authenticationManager.authenticate(
+//                    new UsernamePasswordAuthenticationToken(
+//                            authRequest.username(), authRequest.password()
+//                    )
+//            );
             String token = jwtService.generateToken(user.getEmailAddress());
             return new AuthResponse(token);
         } else {
