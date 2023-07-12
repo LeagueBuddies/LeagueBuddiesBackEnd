@@ -2,7 +2,6 @@ package com.league_buddies.backend.user;
 
 import com.league_buddies.backend.exception.IllegalArgumentException;
 import com.league_buddies.backend.exception.UserNotFoundException;
-import com.league_buddies.backend.exception.UsernameAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,31 +28,16 @@ public class UserService {
         }
     }
 
-    public User findByUsername(String username) {
+    public User findByEmailAddress(String username) {
         if (username.isEmpty() || username.isBlank() || username == null) {
             throw new IllegalArgumentException("Username must not be empty.");
         }
-        Optional<User> optionalUser = userRepository.findByUsername(username);
+        Optional<User> optionalUser = userRepository.findByEmailAddress(username);
         if (optionalUser.isPresent()) {
             return optionalUser.get();
         } else {
             throw new UserNotFoundException(String.format("User with username: %s was not found.", username));
         }
-    }
-
-    public User createUser(User user) {
-        if (user == null || user.getEmailAddress() == null || user.getPassword() == null) {
-            // TODO Separate all the errors from exceptions into a file for the code to be DRY.
-            throw new IllegalArgumentException("User must not be null.");
-        }
-
-        Optional<User> optionalUser = userRepository.findByUsername(user.getUsername());
-        if (optionalUser.isPresent()) {
-            throw new UsernameAlreadyExistsException("Username is already taken.");
-        }
-
-        User postedUser = userRepository.save(user);
-        return postedUser;
     }
 
     public User updateUser(Long Id, User user) {
@@ -69,7 +53,7 @@ public class UserService {
             throw new UserNotFoundException(String.format("User with Id: %d was not found.", Id));
         } else {
             User currUser = optionalUser.get();
-            currUser.setUsername(user.getUsername());
+            currUser.setDisplayName(user.getDisplayName());
             currUser.setEmailAddress(user.getEmailAddress());
             currUser.setPassword(user.getPassword());
             currUser.setLeagueOfLegendsUserName(user.getLeagueOfLegendsUserName());
@@ -78,6 +62,7 @@ public class UserService {
             currUser.setDescription(user.getDescription());
             currUser.setPlayerType(user.getPlayerType());
             currUser.setWinRate(user.getWinRate());
+            currUser.setRole(user.getRole());
             userRepository.save(currUser);
 
             return currUser;

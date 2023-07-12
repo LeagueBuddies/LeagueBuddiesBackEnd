@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -36,14 +35,12 @@ class UserControllerTest {
     private UserController userController;
 
     @Autowired
-    private Jackson2ObjectMapperBuilder mapperBuilder;
-
-    @Autowired
     CustomExceptionHandler customExceptionHandler;
 
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
     private ObjectMapper objectMapper;
 
     private long id;
@@ -71,18 +68,13 @@ class UserControllerTest {
                 .setControllerAdvice(customExceptionHandler)
                 .build();
 
-        // Before I was creating a new ObjectMapper() but it comes with no configurations
-        // The correct way of doing it is using JacksonObjectMapperBuilder which comes
-        // preconfigured
-        objectMapper = mapperBuilder.build();
-
         id = 1L;
         username = "Isolated";
         email = "email@gmail.com";
         password = "pw12345";
         optionalUser = Optional.of(new User());
         optionalUser.get().setId(id);
-        optionalUser.get().setUsername(username);
+        optionalUser.get().setDisplayName(username);
         optionalUser.get().setEmailAddress(email);
         optionalUser.get().setPassword(password);
     }
@@ -137,7 +129,7 @@ class UserControllerTest {
     @Test
     public void throwsWhenUserDoesNotExistInDatabaseWithGivenUsername() throws Exception {
         // Arrange
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByEmailAddress(anyString())).thenReturn(Optional.empty());
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
@@ -170,7 +162,7 @@ class UserControllerTest {
     @Test
     public void canGetUserByUsername() throws Exception {
         // Arrange
-        when(userRepository.findByUsername(anyString())).thenReturn(optionalUser);
+        when(userRepository.findByEmailAddress(anyString())).thenReturn(optionalUser);
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
@@ -180,56 +172,7 @@ class UserControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertEquals(username, user.getUsername());
-    }
-
-    @Test
-    public void canCreateUser() throws Exception {
-        // Arrange
-        User user = new User(email, password);
-        when(userRepository.save(any(User.class))).thenReturn(user);
-
-        // Act
-        MockHttpServletResponse response = mockMvc.perform(
-                post("/api/v1/user/").contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user))).andReturn().getResponse();
-                User userPosted = objectMapper.readValue(response.getContentAsString(), User.class);
-
-        // Assert
-        assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertEquals(email, userPosted.getEmailAddress());
-        assertEquals(password, userPosted.getPassword());
-    }
-
-    @Test
-    public void throwsWhenCreateUserGetsNullValue() throws Exception {
-        // TODO look up if there is a way to allow only data JPA to create an empty entity. To make it easier to test.
-        // Act
-        MockHttpServletResponse response = mockMvc.perform(
-                post("/api/v1/user/").contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new User()))).andReturn().getResponse();
-        ApiException apiException = objectMapper.readValue(response.getContentAsString(), ApiException.class);
-
-        // Assert
-        assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
-        assertEquals("User must not be null.", apiException.getMessage());
-    }
-
-    @Test
-    public void throwsWhenCreateUserGetsAlreadyExistingUsername() throws Exception {
-        // Arrange
-        when(userRepository.findByUsername(anyString())).thenReturn(optionalUser);
-
-        // Act
-        MockHttpServletResponse response = mockMvc.perform(
-                post("/api/v1/user").contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(optionalUser.get()))
-        ).andReturn().getResponse();
-        ApiException apiException = objectMapper.readValue(response.getContentAsString(), ApiException.class);
-
-        // Assert
-        assertEquals(HttpStatus.CONFLICT.value(), response.getStatus());
-        assertEquals("Username is already taken.", apiException.getMessage());
+        assertEquals(username, user.getDisplayName());
     }
 
     @Test

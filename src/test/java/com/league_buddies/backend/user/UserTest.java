@@ -18,23 +18,23 @@ class UserTest {
     @Test
     void setUsername() {
         // Act
-        user.setUsername("Noel");
+        user.setDisplayName("Noel");
 
         // Assert
-        assertEquals("Noel", user.getUsername());
+        assertEquals("Noel", user.getDisplayName());
     }
 
     @Test
     void doesNotSetUsernameWhenGivenEmptyString() {
         // Arrange
-        user.setUsername("Noel");
+        user.setDisplayName("Noel");
 
         // Act
-        user.setUsername("");
+        user.setDisplayName("");
 
         // Assert
-        assertNotEquals("", user.getUsername());
-        assertEquals("Noel", user.getUsername());
+        assertNotEquals("", user.getDisplayName());
+        assertEquals("Noel", user.getDisplayName());
     }
 
     @Test

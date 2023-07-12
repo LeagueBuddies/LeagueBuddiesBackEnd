@@ -21,13 +21,7 @@ public class UserController {
 
     @GetMapping("/username/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable("username") String username) {
-        return ResponseEntity.ok(userService.findByUsername(username));
-    }
-
-    @PostMapping()
-    public ResponseEntity<User> postUser(@RequestBody User user) {
-        // TODO fix this because what if the user in the body comes with everything?
-        return ResponseEntity.ok(userService.createUser(user));
+        return ResponseEntity.ok(userService.findByEmailAddress(username));
     }
 
     @PutMapping("/{id}")

@@ -2,7 +2,6 @@ package com.league_buddies.backend.user;
 
 import com.league_buddies.backend.exception.IllegalArgumentException;
 import com.league_buddies.backend.exception.UserNotFoundException;
-import com.league_buddies.backend.exception.UsernameAlreadyExistsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +32,6 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Stub the userRepo into our service before each test.
         userService = new UserService(userRepository);
 
         optionalUser = Optional.of(new User("email@gmail.com", "password1234"));
@@ -42,7 +40,7 @@ class UserServiceTest {
         username = "Isolated";
 
         optionalUser.get().setId(id);
-        optionalUser.get().setUsername(username);
+        optionalUser.get().setDisplayName(username);
 
         user = optionalUser.get();
     }
@@ -89,25 +87,25 @@ class UserServiceTest {
     @Test
     void findsByUsername() {
         // Arrange
-        optionalUser.get().setUsername("Isolated");
-        when(userRepository.findByUsername(anyString())).thenReturn(optionalUser);
+        optionalUser.get().setDisplayName("Isolated");
+        when(userRepository.findByEmailAddress(anyString())).thenReturn(optionalUser);
 
         // Act
-        User user = userService.findByUsername("Isolated");
+        User user = userService.findByEmailAddress("Isolated");
 
         // Assert
-        verify(userRepository).findByUsername("Isolated");
-        assertEquals("Isolated", user.getUsername());
+        verify(userRepository).findByEmailAddress("Isolated");
+        assertEquals("Isolated", user.getDisplayName());
     }
 
     @Test
     void throwsWhenUserDoesNotExistWithGivenUsername() {
         // Arrange
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByEmailAddress(anyString())).thenReturn(Optional.empty());
 
         // Act
         UserNotFoundException exception = assertThrows(
-                UserNotFoundException.class, () -> userService.findByUsername("Isolated")
+                UserNotFoundException.class, () -> userService.findByEmailAddress("Isolated")
         );
 
         // Assert
@@ -118,49 +116,10 @@ class UserServiceTest {
     void throwsWhenFindByUsernameGetsEmptyString() {
         // Act
         IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class, () -> userService.findByUsername("")
+                IllegalArgumentException.class, () -> userService.findByEmailAddress("")
         );
 
         assertEquals("Username must not be empty.", exception.getMessage());
-    }
-
-    @Test
-    void throwsWhenCreateUserIsGivenNullValue() {
-        // Act
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class, () -> userService.createUser(null)
-        );
-
-        // Assert
-        assertEquals("User must not be null.", exception.getMessage());
-    }
-
-    @Test
-    void createsUser() {
-        // Arrange
-        when(userRepository.save(any(User.class))).thenReturn(user);
-
-        // Act
-        User createdUser = userService.createUser(user);
-
-        // Assert
-        assertNotNull(createdUser);
-        assertEquals(user.getId(), createdUser.getId());
-        assertEquals(user.getUsername(), createdUser.getUsername());
-    }
-
-    @Test
-    void throwsWhenCreatesUserIsGivenAlreadyExistingUsername() {
-        // Arrange
-        when(userRepository.findByUsername(anyString())).thenReturn(optionalUser);
-
-        // Act
-        UsernameAlreadyExistsException exception = assertThrows(
-                UsernameAlreadyExistsException.class, () -> userService.createUser(user)
-        );
-
-        // Assert
-        assertEquals("Username is already taken.", exception.getMessage());
     }
 
     @Test
@@ -204,7 +163,7 @@ class UserServiceTest {
         // Arrange
         when(userRepository.findById(anyLong())).thenReturn(optionalUser);
         User newUserData = new User();
-        newUserData.setUsername("Noel");
+        newUserData.setDisplayName("Noel");
         newUserData.setEmailAddress("newEmail@gmail.com");
 
         // Act
@@ -212,7 +171,7 @@ class UserServiceTest {
 
         // Assert
         assertEquals(newUserData.getEmailAddress(), updatedUser.getEmailAddress());
-        assertEquals(newUserData.getUsername(), updatedUser.getUsername());
+        assertEquals(newUserData.getDisplayName(), updatedUser.getDisplayName());
     }
 
     @Test
