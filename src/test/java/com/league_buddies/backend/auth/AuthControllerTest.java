@@ -1,46 +1,43 @@
 package com.league_buddies.backend.auth;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.league_buddies.backend.exception.ApiException;
-import com.league_buddies.backend.exception.CustomExceptionHandler;
+import com.league_buddies.backend.exception.*;
+import com.league_buddies.backend.exception.IllegalArgumentException;
 import com.league_buddies.backend.security.jwt.JwtService;
 import com.league_buddies.backend.user.User;
-import com.league_buddies.backend.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @ExtendWith(MockitoExtension.class)
-@WebMvcTest(AuthControllerTest.class)
+@WebMvcTest(AuthController.class)
 class AuthControllerTest {
-    private AuthController authController;
-
+    @MockBean
     private AuthService authService;
 
+    @MockBean
     private JwtService jwtService;
 
-    @Mock
-    private UserRepository userRepository;
-
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -50,35 +47,32 @@ class AuthControllerTest {
 
     private String password;
 
+    private AuthRequest authRequest;
+
     @BeforeEach
     void setUp() {
-        jwtService = new JwtService();
-        authService = new AuthService(jwtService, userRepository);
-        authController = new AuthController(authService);
-
         username = "username";
         password = "password";
+        authRequest = new AuthRequest(username, password);
 
-
-        mockMvc = MockMvcBuilders.standaloneSetup(authController)
-                .setControllerAdvice(CustomExceptionHandler.class)
-                .build();
+        User user = new User(username, password);
+        Authentication auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
     }
 
     @Test
     public void throwsWhenRegisterWithAnAlreadyRegisteredEmail() throws Exception {
         // Arrange
-        when(userRepository.findByEmailAddress(anyString())).thenReturn(
-                Optional.of(new User(username, password))
-        );
-        AuthRequest authRequest = new AuthRequest(username, password);
+        when(authService.register(any())).thenThrow(new UsernameAlreadyExistsException("Username is already taken."));
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                        post("/api/v1/auth/register")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper
-                                        .writeValueAsString(authRequest))
+                post("/api/v1/auth/register")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authRequest))
         ).andReturn().getResponse();
 
         ApiException apiException = objectMapper.readValue(response.getContentAsString(), ApiException.class);
@@ -90,11 +84,15 @@ class AuthControllerTest {
 
     @Test
     public void throwsWhenRegisterIsMissingUsernameOrPassword() throws Exception {
-        AuthRequest authRequest = new AuthRequest(username, "");
+        // Arrange
+        when(authService.register(any())).thenThrow(
+                new IllegalArgumentException("Both a username and a password are needed."))
+        ;
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
                 post("/api/v1/auth/register")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(authRequest))
         ).andReturn().getResponse();
@@ -109,17 +107,15 @@ class AuthControllerTest {
     @Test
     public void canRegister() throws Exception {
         // Arrange
-        when(userRepository.findByEmailAddress(anyString())).thenReturn(Optional.empty());
-        when(userRepository.save(any())).thenReturn(new User(username, password));
+        AuthResponse fakeAuthResponse = new AuthResponse("fakeToken");
+        when(authService.register(any())).thenReturn(fakeAuthResponse);
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
                 post("/api/v1/auth/register")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper
-                                .writeValueAsString(
-                                        new AuthRequest(username, password)
-                                ))
+                        .content(objectMapper.writeValueAsString(authRequest))
         ).andReturn().getResponse();
 
         AuthResponse authResponse = objectMapper.readValue(response.getContentAsString(), AuthResponse.class);
@@ -127,17 +123,23 @@ class AuthControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK.value(), response.getStatus());
+        assertEquals("fakeToken", authResponse.token());
         assertTrue(authResponse.token() instanceof String);
     }
 
     @Test
     public void throwsWhenLoggingIsMissingUsernameOrPassword() throws Exception {
+        // Arrange
+        when(authService.login(any())).thenThrow(
+                new IllegalArgumentException("Both a username and a password are needed.")
+        );
+
         // Act
         MockHttpServletResponse response = mockMvc.perform(
                 post("/api/v1/auth/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper
-                                .writeValueAsString(new AuthRequest(username, null)))
+                        .content(objectMapper.writeValueAsString(authRequest))
         ).andReturn().getResponse();
 
         ApiException apiException = objectMapper.readValue(response.getContentAsString(), ApiException.class);
@@ -150,14 +152,14 @@ class AuthControllerTest {
     @Test
     public void throwsWhenLoggingWithIncorrectPassword() throws Exception {
         // Arrange
-        when(userRepository.findByEmailAddress(anyString())).thenReturn(
-                Optional.of(new User(username, "wrongPassword")));
+        when(authService.login(any())).thenThrow(new InvalidPasswordException("Password entered is incorrect."));
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
                 post("/api/v1/auth/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new AuthRequest(username, password)))
+                        .content(objectMapper.writeValueAsString(authRequest))
         ).andReturn().getResponse();
 
         ApiException apiException = objectMapper.readValue(response.getContentAsString(), ApiException.class);
@@ -170,13 +172,17 @@ class AuthControllerTest {
     @Test
     public void throwsWhenLoggingWithUsernameThatDoesNotExist() throws Exception {
         // Arrange
-        when(userRepository.findByEmailAddress(anyString())).thenReturn(Optional.empty());
+        // TODO Make a file where we can read all the exception messages from.
+        when(authService.login(any())).thenThrow(
+                new UserNotFoundException("The user was not found using the email you've provided.")
+        );
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
                 post("/api/v1/auth/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new AuthRequest(username, password)))
+                        .content(objectMapper.writeValueAsString(authRequest))
         ).andReturn().getResponse();
 
         ApiException apiException = objectMapper.readValue(response.getContentAsString(), ApiException.class);
@@ -187,7 +193,23 @@ class AuthControllerTest {
     }
 
     @Test
-    public void canLoggin() {
+    public void canLogin() throws Exception {
+        // Arrange
+        AuthResponse fakeAuthResponse = new AuthResponse("fakeToken");
+        when(authService.login(any())).thenReturn(fakeAuthResponse);
 
+        // Act
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/v1/auth/login")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authRequest))
+        ).andReturn().getResponse();
+        AuthResponse authResponse = objectMapper.readValue(response.getContentAsString(), AuthResponse.class);
+
+        // Assert
+        assertEquals(HttpStatus.OK.value(), response.getStatus());
+        assertEquals("fakeToken", authResponse.token());
+        assertTrue(authResponse.token() instanceof String);
     }
 }

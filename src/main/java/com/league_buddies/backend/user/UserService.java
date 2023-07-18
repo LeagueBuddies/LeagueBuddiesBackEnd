@@ -2,19 +2,16 @@ package com.league_buddies.backend.user;
 
 import com.league_buddies.backend.exception.IllegalArgumentException;
 import com.league_buddies.backend.exception.UserNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    UserRepository userRepository;
-
-    @Autowired
-    public UserService(UserRepository repository) {
-        userRepository = repository;
-    }
+    private final UserRepository userRepository;
 
     public User findById(long id) {
         if (id < 0) {

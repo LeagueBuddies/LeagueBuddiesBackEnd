@@ -1,4 +1,4 @@
-package com.league_buddies.backend.security;
+package com.league_buddies.backend.configuration;
 
 import com.league_buddies.backend.security.authentication.AuthenticationFilter;
 
@@ -35,6 +35,7 @@ public class SecurityConfiguration {
                 .authenticated()
 
         )
+                //TODO Find out why disabling CSRF makes it so that mockMvc needs a CSRF token?????????
                 .csrf().disable()
                 .authenticationProvider(authenticationProvider)
                 .authenticationManager(authenticationManager)

@@ -1,18 +1,14 @@
 package com.league_buddies.backend.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/user")
+@RequiredArgsConstructor
 public class UserController {
-    UserService userService;
-
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+    private final UserService userService;
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable("id") long id) {

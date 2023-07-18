@@ -7,31 +7,23 @@ import com.league_buddies.backend.exception.UsernameAlreadyExistsException;
 import com.league_buddies.backend.security.jwt.JwtService;
 import com.league_buddies.backend.user.User;
 import com.league_buddies.backend.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
     private final JwtService jwtService;
 
     private final UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
 //    @Autowired
 //    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    public AuthService(JwtService jwtService, UserRepository userRepository) {
-        this.jwtService = jwtService;
-        this.userRepository = userRepository;
-    }
 
     public AuthResponse register(AuthRequest authRequest) {
         String username = authRequest.username();

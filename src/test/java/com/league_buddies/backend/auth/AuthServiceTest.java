@@ -7,15 +7,12 @@ import com.league_buddies.backend.exception.UsernameAlreadyExistsException;
 import com.league_buddies.backend.security.jwt.JwtService;
 import com.league_buddies.backend.user.User;
 import com.league_buddies.backend.user.UserRepository;
-import com.league_buddies.backend.user.UserService;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -42,9 +39,12 @@ class AuthServiceTest {
 
     private String fakeToken = "JWTTokenFake";
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setUp() {
-        authService = new AuthService(jwtService, userRepository);
+        authService = new AuthService(jwtService, userRepository, passwordEncoder);
         user = new User(username, password);
     }
 
@@ -94,6 +94,7 @@ class AuthServiceTest {
         // Arrange
         when(userRepository.findByEmailAddress(anyString())).thenReturn(Optional.of(user));
         when(jwtService.generateToken(anyString())).thenReturn(fakeToken);
+        when(passwordEncoder.matches(any(), any())).thenReturn(true);
 
         // Act
         AuthResponse authResponse = authService.login(new AuthRequest(username, password));
