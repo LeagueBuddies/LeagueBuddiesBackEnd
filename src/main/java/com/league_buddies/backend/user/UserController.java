@@ -11,18 +11,47 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable("id") long id) {
-        return ResponseEntity.ok(userService.findById(id));
+    public ResponseEntity<UserDTO> getUserById(@PathVariable("id") long id) {
+        User user = userService.findById(id);
+        return ResponseEntity.ok(UserDTO.builder()
+                .displayName(user.getDisplayName())
+                .leagueOfLegendsUserName(user.getLeagueOfLegendsUserName())
+                .playerType(user.getPlayerType())
+                .favoriteChampion(user.getFavoriteChampion())
+                .description(user.getDescription())
+                .favoritePosition(user.getFavoritePosition())
+                .winRate(user.getWinRate())
+                .build());
     }
 
     @GetMapping("/username/{username}")
-    public ResponseEntity<User> getUserByUsername(@PathVariable("username") String username) {
-        return ResponseEntity.ok(userService.findByEmailAddress(username));
+    public ResponseEntity<UserDTO> getUserByUsername(@PathVariable("username") String username) {
+        User user = userService.findByEmailAddress(username);
+        return ResponseEntity.ok(UserDTO.builder()
+                .displayName(user.getDisplayName())
+                .leagueOfLegendsUserName(user.getLeagueOfLegendsUserName())
+                .playerType(user.getPlayerType())
+                .favoriteChampion(user.getFavoriteChampion())
+                .description(user.getDescription())
+                .favoritePosition(user.getFavoritePosition())
+                .winRate(user.getWinRate())
+                .build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable("id") long id, @RequestBody User user) {
-        return ResponseEntity.ok(userService.updateUser(id, user));
+    public ResponseEntity<UserDTO> updateUser(@PathVariable("id") long id, @RequestBody User user) {
+        User updatedUser = userService.updateUser(id, user);
+        return ResponseEntity.ok(
+                UserDTO.builder()
+                        .displayName(user.getDisplayName())
+                        .leagueOfLegendsUserName(user.getLeagueOfLegendsUserName())
+                        .playerType(user.getPlayerType())
+                        .favoriteChampion(user.getFavoriteChampion())
+                        .description(user.getDescription())
+                        .favoritePosition(user.getFavoritePosition())
+                        .winRate(user.getWinRate())
+                        .build()
+        );
     }
 
     @DeleteMapping("/{id}")

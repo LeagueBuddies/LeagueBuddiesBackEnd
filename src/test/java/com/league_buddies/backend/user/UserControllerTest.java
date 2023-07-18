@@ -125,7 +125,7 @@ public class UserControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertEquals(id, user.getId());
+        assertEquals(displayName, user.getDisplayName());
     }
 
     @Test
@@ -178,7 +178,7 @@ public class UserControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertEquals(email, user.getEmailAddress());
+        assertEquals(displayName, user.getDisplayName());
     }
 
     @Test
@@ -252,7 +252,9 @@ public class UserControllerTest {
     @Test
     public void canUpdateUser() throws Exception {
         // Arrange
-        User newUser = new User("newEmail@gmail.com", "newPassword123");
+        String newDisplayName = "Ghost";
+        User newUser = new User();
+        newUser.setDisplayName(newDisplayName);
         when(userService.updateUser(anyLong(), any(User.class))).thenReturn(newUser);
 
         // Act
@@ -266,8 +268,7 @@ public class UserControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertEquals(newUser.getEmailAddress(), updatedUser.getEmailAddress());
-        assertEquals(newUser.getPassword(), updatedUser.getPassword());
+        assertEquals(newDisplayName, updatedUser.getDisplayName());
     }
 
 
