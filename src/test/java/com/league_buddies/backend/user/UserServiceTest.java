@@ -2,11 +2,13 @@ package com.league_buddies.backend.user;
 
 import com.league_buddies.backend.exception.IllegalArgumentException;
 import com.league_buddies.backend.exception.UserNotFoundException;
+import com.league_buddies.backend.util.MessageResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.support.ResourceBundleMessageSource;
 
 import java.util.Optional;
 
@@ -26,23 +28,33 @@ class UserServiceTest {
 
     private User user;
 
-    private Long id;
+    private final Long id = 1L;
 
-    private String username;
+    private final String username = "Isolated";
+
+    private final String email = "email@gmail.com";
+
+    private final String password = "password1234";
+
+    private MessageResolver messageResolver;
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository);
+        // TODO Look more into this.
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        // TODO Add the basename and default encoding as properties in application so that the app config and this config have the exact same one.
+        messageSource.setBasename("messages");
+        messageSource.setDefaultEncoding("UTF-8");
 
-        optionalUser = Optional.of(new User("email@gmail.com", "password1234"));
+        messageResolver = new MessageResolver(messageSource);
+        userService = new UserService(userRepository, messageResolver);
 
-        id = 1L;
-        username = "Isolated";
+        user = new User(email, password);
+        user.setEmailAddress(email);
+        user.setDisplayName(username);
+        user.setId(id);
 
-        optionalUser.get().setId(id);
-        optionalUser.get().setDisplayName(username);
-
-        user = optionalUser.get();
+        optionalUser = Optional.of(user);
     }
 
     @Test
@@ -70,7 +82,8 @@ class UserServiceTest {
         );
 
         // Assert
-        assertEquals("User with id: 1 was not found.", exception.getMessage());
+        // TODO Before finalizing this PR, check how to change the language for error messages.
+        assertEquals(messageResolver.getMessage("userNotFound"), exception.getMessage());
     }
 
     @Test
@@ -81,21 +94,22 @@ class UserServiceTest {
         );
 
         // Assert
-        assertEquals("Id cannot be negative.", exception.getMessage());
+        assertEquals(messageResolver.getMessage("illegalArgument"),
+                exception.getMessage()
+        );
     }
 
     @Test
     void findsByUsername() {
         // Arrange
-        optionalUser.get().setDisplayName("Isolated");
         when(userRepository.findByEmailAddress(anyString())).thenReturn(optionalUser);
 
         // Act
-        User user = userService.findByEmailAddress("Isolated");
+        User user = userService.findByEmailAddress(email);
 
         // Assert
-        verify(userRepository).findByEmailAddress("Isolated");
-        assertEquals("Isolated", user.getDisplayName());
+        verify(userRepository).findByEmailAddress(anyString());
+        assertEquals(username, user.getDisplayName());
     }
 
     @Test
@@ -105,11 +119,11 @@ class UserServiceTest {
 
         // Act
         UserNotFoundException exception = assertThrows(
-                UserNotFoundException.class, () -> userService.findByEmailAddress("Isolated")
+                UserNotFoundException.class, () -> userService.findByEmailAddress(email)
         );
 
         // Assert
-        assertEquals("User with username: Isolated was not found.", exception.getMessage());
+        assertEquals(messageResolver.getMessage("userNotFound"), exception.getMessage());
     }
 
     @Test
@@ -119,7 +133,7 @@ class UserServiceTest {
                 IllegalArgumentException.class, () -> userService.findByEmailAddress("")
         );
 
-        assertEquals("Username must not be empty.", exception.getMessage());
+        assertEquals(messageResolver.getMessage("illegalArgument"), exception.getMessage());
     }
 
     @Test
@@ -133,7 +147,7 @@ class UserServiceTest {
         );
 
         // Assert
-        assertEquals("User with Id: 0 was not found.", exception.getMessage());
+        assertEquals(messageResolver.getMessage("userNotFound"), exception.getMessage());
     }
 
     @Test
@@ -144,7 +158,7 @@ class UserServiceTest {
         );
 
         // Assert
-        assertEquals("User cannot be null.", exception.getMessage());
+        assertEquals(messageResolver.getMessage("illegalArgument"), exception.getMessage());
     }
 
     @Test
@@ -155,8 +169,7 @@ class UserServiceTest {
         );
 
         // Assert
-        assertEquals("Id cannot be negative.", exception.getMessage());
-    }
+        assertEquals(messageResolver.getMessage("illegalArgument"), exception.getMessage());    }
 
     @Test
     void updatesUser() {
@@ -182,8 +195,7 @@ class UserServiceTest {
         );
 
         // Assert
-        assertEquals("Id cannot be negative.", exception.getMessage());
-    }
+        assertEquals(messageResolver.getMessage("illegalArgument"), exception.getMessage());    }
 
     @Test
     void throwsWhenUserToDeleteDoesNotExist() {
@@ -196,7 +208,7 @@ class UserServiceTest {
         );
 
         // Assert
-        assertEquals(String.format("User with id: %d was not found.", id), exception.getMessage());
+        assertEquals(messageResolver.getMessage("userNotFound"), exception.getMessage());
     }
 
     @Test
@@ -208,6 +220,9 @@ class UserServiceTest {
         String response = userService.deleteUser(id);
 
         // Assert
-        assertEquals(String.format("User with id: 1 was deleted.", id), response);
+        assertEquals(messageResolver.getMessage(
+                "userDeleted",
+                new Object[] {id}
+                ), response);
     }
 }

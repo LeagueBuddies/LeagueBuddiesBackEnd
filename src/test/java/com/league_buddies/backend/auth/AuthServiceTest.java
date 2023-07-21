@@ -7,11 +7,13 @@ import com.league_buddies.backend.exception.UsernameAlreadyExistsException;
 import com.league_buddies.backend.security.jwt.JwtService;
 import com.league_buddies.backend.user.User;
 import com.league_buddies.backend.user.UserRepository;
+import com.league_buddies.backend.util.MessageResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -23,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
-    private AuthService authService;
 
     @Mock
     private UserRepository userRepository;
@@ -31,21 +32,29 @@ class AuthServiceTest {
     @Mock
     private JwtService jwtService;
 
-    private User user;
-
-    private String username = "username";
-
-    private String password = "password";
-
-    private String fakeToken = "JWTTokenFake";
-
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    private AuthService authService;
+
+    private MessageResolver messageResolver;
+
+    private final String username = "username";
+
+    private final String password = "password";
+
+    private final String fakeToken = "JWTTokenFake";
+
+    private final User user = new User(username, password);
+
     @BeforeEach
     void setUp() {
-        authService = new AuthService(jwtService, userRepository, passwordEncoder);
-        user = new User(username, password);
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasename("messages");
+        messageSource.setDefaultEncoding("UTF-8");
+
+        messageResolver = new MessageResolver(messageSource);
+        authService = new AuthService(jwtService, userRepository, passwordEncoder, messageResolver);
     }
 
     @Test
@@ -72,7 +81,7 @@ class AuthServiceTest {
         );
 
         // Assert
-        assertEquals("Both a username and a password are needed.", exception.getMessage());
+        assertEquals(messageResolver.getMessage("illegalArgument"), exception.getMessage());
     }
 
     @Test
@@ -86,7 +95,10 @@ class AuthServiceTest {
         );
 
         // Assert
-        assertEquals("Username is already taken.", exception.getMessage());
+        assertEquals(messageResolver.getMessage(
+                "usernameAlreadyExists",
+                new Object[] {username}
+        ), exception.getMessage());
     }
 
     @Test
@@ -111,7 +123,7 @@ class AuthServiceTest {
         );
 
         // Assert
-        assertEquals("Both a username and a password are needed.", exception.getMessage());
+        assertEquals(messageResolver.getMessage("illegalArgument"), exception.getMessage());
     }
 
     @Test
@@ -125,7 +137,7 @@ class AuthServiceTest {
         );
 
         // Assert
-        assertEquals("Password entered is incorrect.", exception.getMessage());
+        assertEquals(messageResolver.getMessage("invalidPassword"), exception.getMessage());
     }
 
     @Test
@@ -139,6 +151,6 @@ class AuthServiceTest {
         );
 
         // Assert
-        assertEquals("The user was not found using the email you've provided.", exception.getMessage());
+        assertEquals(messageResolver.getMessage("userNotFound"), exception.getMessage());
     }
 }
