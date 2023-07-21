@@ -35,7 +35,6 @@ public class SecurityConfiguration {
                 .authenticated()
 
         )
-                //TODO Find out why disabling CSRF makes it so that mockMvc needs a CSRF token?????????
                 .csrf().disable()
                 .authenticationProvider(authenticationProvider)
                 .authenticationManager(authenticationManager)

@@ -5,6 +5,7 @@ import com.league_buddies.backend.exception.*;
 import com.league_buddies.backend.exception.IllegalArgumentException;
 import com.league_buddies.backend.security.jwt.JwtService;
 import com.league_buddies.backend.user.User;
+import com.league_buddies.backend.util.MessageResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -43,29 +45,36 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private String username;
+    private final String username = "username";
 
-    private String password;
+    private final String password = "password";
 
-    private AuthRequest authRequest;
+    private final AuthRequest authRequest = new AuthRequest(username, password);
+
+    private MessageResolver messageResolver;
+
+    private String exceptionMessage;
 
     @BeforeEach
     void setUp() {
-        username = "username";
-        password = "password";
-        authRequest = new AuthRequest(username, password);
-
         User user = new User(username, password);
         Authentication auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(auth);
         SecurityContextHolder.setContext(context);
+
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasename("messages");
+        messageSource.setDefaultEncoding("UTF-8");
+
+        messageResolver = new MessageResolver(messageSource);
     }
 
     @Test
     public void throwsWhenRegisterWithAnAlreadyRegisteredEmail() throws Exception {
         // Arrange
-        when(authService.register(any())).thenThrow(new UsernameAlreadyExistsException("Username is already taken."));
+        exceptionMessage = messageResolver.getMessage("usernameAlreadyExists", new Object[] {username});
+        when(authService.register(any())).thenThrow(new UsernameAlreadyExistsException(exceptionMessage));
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
@@ -79,15 +88,14 @@ class AuthControllerTest {
 
         // Assert
         assertEquals(HttpStatus.CONFLICT.value(), response.getStatus());
-        assertEquals("Username is already taken.", apiException.getMessage());
+        assertEquals(exceptionMessage, apiException.getMessage());
     }
 
     @Test
     public void throwsWhenRegisterIsMissingUsernameOrPassword() throws Exception {
         // Arrange
-        when(authService.register(any())).thenThrow(
-                new IllegalArgumentException("Both a username and a password are needed."))
-        ;
+        exceptionMessage = messageResolver.getMessage("illegalArgument");
+        when(authService.register(any())).thenThrow(new IllegalArgumentException(exceptionMessage));
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
@@ -101,7 +109,7 @@ class AuthControllerTest {
 
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
-        assertEquals("Both a username and a password are needed.", apiException.getMessage());
+        assertEquals(exceptionMessage, apiException.getMessage());
     }
 
     @Test
@@ -120,7 +128,6 @@ class AuthControllerTest {
 
         AuthResponse authResponse = objectMapper.readValue(response.getContentAsString(), AuthResponse.class);
 
-
         // Assert
         assertEquals(HttpStatus.OK.value(), response.getStatus());
         assertEquals("fakeToken", authResponse.token());
@@ -130,9 +137,8 @@ class AuthControllerTest {
     @Test
     public void throwsWhenLoggingIsMissingUsernameOrPassword() throws Exception {
         // Arrange
-        when(authService.login(any())).thenThrow(
-                new IllegalArgumentException("Both a username and a password are needed.")
-        );
+        exceptionMessage = messageResolver.getMessage("illegalArgument");
+        when(authService.login(any())).thenThrow(new IllegalArgumentException(exceptionMessage));
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
@@ -146,13 +152,14 @@ class AuthControllerTest {
 
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
-        assertEquals("Both a username and a password are needed.", apiException.getMessage());
+        assertEquals(exceptionMessage, apiException.getMessage());
     }
 
     @Test
     public void throwsWhenLoggingWithIncorrectPassword() throws Exception {
         // Arrange
-        when(authService.login(any())).thenThrow(new InvalidPasswordException("Password entered is incorrect."));
+        exceptionMessage = messageResolver.getMessage("invalidPassword");
+        when(authService.login(any())).thenThrow(new InvalidPasswordException(exceptionMessage));
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
@@ -166,16 +173,14 @@ class AuthControllerTest {
 
         // Assert
         assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
-        assertEquals("Password entered is incorrect.", apiException.getMessage());
+        assertEquals(exceptionMessage, apiException.getMessage());
     }
 
     @Test
     public void throwsWhenLoggingWithUsernameThatDoesNotExist() throws Exception {
         // Arrange
-        // TODO Make a file where we can read all the exception messages from.
-        when(authService.login(any())).thenThrow(
-                new UserNotFoundException("The user was not found using the email you've provided.")
-        );
+        exceptionMessage = messageResolver.getMessage("userNotFound");
+        when(authService.login(any())).thenThrow(new UserNotFoundException(exceptionMessage));
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
@@ -189,7 +194,7 @@ class AuthControllerTest {
 
         // Assert
         assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
-        assertEquals("The user was not found using the email you've provided.", apiException.getMessage());
+        assertEquals(exceptionMessage, apiException.getMessage());
     }
 
     @Test

@@ -2,8 +2,8 @@ package com.league_buddies.backend.user;
 
 import com.league_buddies.backend.exception.IllegalArgumentException;
 import com.league_buddies.backend.exception.UserNotFoundException;
+import com.league_buddies.backend.util.MessageResolver;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -11,43 +11,43 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
     private final UserRepository userRepository;
+
+    private final MessageResolver messageResolver;
 
     public User findById(long id) {
         if (id < 0) {
-            throw new IllegalArgumentException("Id cannot be negative.");
+            throw new IllegalArgumentException(messageResolver.getMessage("illegalArgument"));
         }
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
             return optionalUser.get();
         } else {
-            throw new UserNotFoundException(String.format("User with id: %d was not found.", id));
+            throw new UserNotFoundException(messageResolver.getMessage("userNotFound"));
         }
     }
 
     public User findByEmailAddress(String username) {
         if (username.isEmpty() || username.isBlank() || username == null) {
-            throw new IllegalArgumentException("Username must not be empty.");
+            throw new IllegalArgumentException(messageResolver.getMessage("illegalArgument"));
         }
         Optional<User> optionalUser = userRepository.findByEmailAddress(username);
         if (optionalUser.isPresent()) {
             return optionalUser.get();
         } else {
-            throw new UserNotFoundException(String.format("User with username: %s was not found.", username));
+            throw new UserNotFoundException(messageResolver.getMessage("userNotFound"));
         }
     }
 
     public User updateUser(Long Id, User user) {
-        if (user == null) {
-            throw new IllegalArgumentException("User cannot be null.");
-        }
-        if (Id < 0) {
-            throw new IllegalArgumentException("Id cannot be negative.");
+        if (user == null || Id < 0) {
+            throw new IllegalArgumentException(messageResolver.getMessage("illegalArgument"));
         }
 
         Optional<User> optionalUser = userRepository.findById(Id);
         if (optionalUser.isEmpty()) {
-            throw new UserNotFoundException(String.format("User with Id: %d was not found.", Id));
+            throw new UserNotFoundException(messageResolver.getMessage("userNotFound"));
         } else {
             User currUser = optionalUser.get();
             currUser.setDisplayName(user.getDisplayName());
@@ -61,22 +61,24 @@ public class UserService {
             currUser.setWinRate(user.getWinRate());
             currUser.setRole(user.getRole());
             userRepository.save(currUser);
-
             return currUser;
         }
     }
 
     public String deleteUser(Long id) {
         if (id < 0) {
-            throw new IllegalArgumentException("Id cannot be negative.");
+            throw new IllegalArgumentException(messageResolver.getMessage("illegalArgument"));
         }
 
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
-            throw new UserNotFoundException(String.format("User with id: %d was not found.", id));
+            throw new UserNotFoundException(messageResolver.getMessage("userNotFound"));
         } else {
             userRepository.delete(optionalUser.get());
-            return String.format("User with id: %d was deleted.", id);
+            return String.format(messageResolver.getMessage(
+                    "userDeleted",
+                    new Object[] {id}
+            ), id);
         }
     }
 }
