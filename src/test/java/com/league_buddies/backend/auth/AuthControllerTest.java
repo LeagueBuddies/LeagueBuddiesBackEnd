@@ -55,6 +55,8 @@ class AuthControllerTest {
 
     private String exceptionMessage;
 
+    private final String controllerEndpoint = "/api/v1/auth/";
+
     @BeforeEach
     void setUp() {
         User user = new User(username, password);
@@ -78,7 +80,7 @@ class AuthControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/v1/auth/register")
+                post(controllerEndpoint + "/register")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(authRequest))
@@ -99,7 +101,7 @@ class AuthControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/v1/auth/register")
+                post(controllerEndpoint + "/register")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(authRequest))
@@ -120,7 +122,7 @@ class AuthControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/v1/auth/register")
+                post(controllerEndpoint + "/register")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(authRequest))
@@ -142,7 +144,7 @@ class AuthControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/v1/auth/login")
+                post(controllerEndpoint +"/login")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(authRequest))
@@ -163,7 +165,7 @@ class AuthControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/v1/auth/login")
+                post(controllerEndpoint + "/login")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(authRequest))
@@ -184,7 +186,7 @@ class AuthControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/v1/auth/login")
+                post(controllerEndpoint + "/login")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(authRequest))
@@ -205,7 +207,7 @@ class AuthControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/v1/auth/login")
+                post(controllerEndpoint + "/login")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(authRequest))

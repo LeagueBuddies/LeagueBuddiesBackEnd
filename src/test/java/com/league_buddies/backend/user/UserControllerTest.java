@@ -59,6 +59,8 @@ public class UserControllerTest {
 
     private MessageResolver messageResolver;
 
+    private final String controllerEndpoint = "/api/v1/user/";
+
     @BeforeEach
     void setUp() {
         user.setId(id);
@@ -85,7 +87,7 @@ public class UserControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                get(String.format("/api/v1/user/%d", id)))
+                get(controllerEndpoint + id))
                 .andReturn().getResponse();
         ApiException apiException = objectMapper.readValue(response.getContentAsString(), ApiException.class);
 
@@ -102,7 +104,7 @@ public class UserControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                get(String.format("/api/v1/user/%s", id)))
+                get(controllerEndpoint + id))
                 .andReturn().getResponse();
         ApiException apiException = objectMapper.readValue(response.getContentAsString(), ApiException.class);
 
@@ -118,7 +120,7 @@ public class UserControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                get(String.format("/api/v1/user/%d", id)))
+                get(controllerEndpoint + id))
                 .andReturn().getResponse();
         User user = objectMapper.readValue(response.getContentAsString(), User.class);
 
@@ -135,7 +137,7 @@ public class UserControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                get(String.format("/api/v1/user/username/%s", displayName)))
+                get(controllerEndpoint + "username/" + displayName))
                 .andReturn().getResponse();
         ApiException apiException = objectMapper.readValue(response.getContentAsString(), ApiException.class);
 
@@ -153,7 +155,7 @@ public class UserControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                get(String.format("/api/v1/user/username/%s", email)))
+                get(controllerEndpoint + "username/" + email))
                 .andReturn().getResponse();
         ApiException apiException = objectMapper.readValue(response.getContentAsString(), ApiException.class);
 
@@ -169,7 +171,7 @@ public class UserControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                        get(String.format("/api/v1/user/username/%s", email)))
+                        get(controllerEndpoint + "username/" + email))
                 .andReturn().getResponse();
         User user = objectMapper.readValue(response.getContentAsString(), User.class);
 
@@ -186,7 +188,7 @@ public class UserControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                put(String.format("/api/v1/user/%d", id))
+                put(controllerEndpoint + id)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user))
@@ -209,7 +211,7 @@ public class UserControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                put(String.format("/api/v1/user/%d", id))
+                put(controllerEndpoint + id)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user))
@@ -234,7 +236,7 @@ public class UserControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                put(String.format("/api/v1/user/%d", id))
+                put(controllerEndpoint + id)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user))
@@ -258,7 +260,7 @@ public class UserControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                put(String.format("/api/v1/user/%d", id))
+                put(controllerEndpoint + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf())
                         .content(objectMapper.writeValueAsString(newUser))
@@ -279,7 +281,7 @@ public class UserControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                delete(String.format("/api/v1/user/%d", id))
+                delete(controllerEndpoint + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf())
                         .content(objectMapper.writeValueAsString(user))
@@ -299,7 +301,7 @@ public class UserControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                delete(String.format("/api/v1/user/%d", id))
+                delete(controllerEndpoint + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf())
         ).andReturn().getResponse();
@@ -318,7 +320,7 @@ public class UserControllerTest {
 
         // Act
         MockHttpServletResponse response = mockMvc.perform(
-                delete(String.format("/api/v1/user/%d", id))
+                delete(controllerEndpoint + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf())
         ).andReturn().getResponse();
