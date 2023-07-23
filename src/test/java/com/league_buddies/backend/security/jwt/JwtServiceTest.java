@@ -14,7 +14,7 @@ class JwtServiceTest {
     private String token;
     @BeforeEach
     void setUp() {
-        jwtService = new JwtService();
+        jwtService = new JwtService("TestKeygsdfjkhdfgjksdfghkfgjdhdfsdgvbXFCDFF$!");
         username = "username";
         token = jwtService.generateToken(username);
     }

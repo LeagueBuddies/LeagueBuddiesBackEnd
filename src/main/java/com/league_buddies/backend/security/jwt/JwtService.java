@@ -7,6 +7,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +15,14 @@ import java.util.Date;
 
 @Service
 public class JwtService {
-    // TODO move this to application config level.
-    private final String privateKey = "SDGJKHJK35346KHJ4/sdfjkhsdka98dsgd357qjahf2897452381!";
+
+    @Value("${jwtService.privateKey}")
+    private String privateKey;
+
+    public JwtService(@Value("${jwtService.privateKey}") String privateKey) {
+        this.privateKey = privateKey;
+    }
+
     public String generateToken(String username) {
         return Jwts
                 .builder()
