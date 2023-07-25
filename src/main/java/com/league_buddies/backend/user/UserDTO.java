@@ -1,8 +1,8 @@
 package com.league_buddies.backend.user;
 
-import com.league_buddies.backend.playerType.PlayerType;
-import com.league_buddies.backend.position.Position;
 import lombok.Builder;
+
+import java.util.Set;
 
 @Builder
 public record UserDTO (
@@ -12,4 +12,6 @@ public record UserDTO (
         String favoriteChampion,
         String description,
         PlayerType playerType,
-        double winRate) {}
+        double winRate,
+        Set<Server> servers
+        ) {}

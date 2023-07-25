@@ -2,8 +2,6 @@ package com.league_buddies.backend.user;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.league_buddies.backend.configuration.SimpleGrantedAuthorityDeserializer;
-import com.league_buddies.backend.playerType.PlayerType;
-import com.league_buddies.backend.position.Position;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,9 +10,7 @@ import lombok.Setter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Getter
@@ -51,6 +47,8 @@ public class User implements UserDetails {
     // TODO Learn what @Enumerated does.
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
+
+    private Set<Server> servers;
 
     public User(String emailAddress, String password) {
         this.emailAddress = emailAddress;
@@ -104,6 +102,20 @@ public class User implements UserDetails {
             this.winRate = winRate;
         }
 
+    }
+
+    public void setServers(Set<Server> servers) {
+        if (servers != null && !servers.isEmpty()) {
+            if (this.servers == null) {
+                this.servers = servers;
+            } else {
+                for(Server server : servers) {
+                    if (!this.servers.contains(server)) {
+                        this.servers.add(server);
+                    }
+                }
+            }
+        }
     }
 
     public void setEmailAddress(String emailAddress) {
