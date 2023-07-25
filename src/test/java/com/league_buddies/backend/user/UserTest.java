@@ -1,7 +1,5 @@
 package com.league_buddies.backend.user;
 
-import com.league_buddies.backend.playerType.PlayerType;
-import com.league_buddies.backend.position.Position;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

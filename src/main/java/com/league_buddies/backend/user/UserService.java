@@ -60,6 +60,7 @@ public class UserService {
             currUser.setPlayerType(user.getPlayerType());
             currUser.setWinRate(user.getWinRate());
             currUser.setRole(user.getRole());
+            currUser.setServers(user.getServers());
             userRepository.save(currUser);
             return currUser;
         }
